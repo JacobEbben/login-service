@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Login</title>
+  <link rel="icon" href="{{ url_for('static', filename='icons/favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ url_for('static', filename='icons/favicon-32.png') }}" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='knight/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='knight/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script src="{{ url_for('static', filename='js/theme-init.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/' + script) }}"></script>
+</head>
+<body class="kn-root">
+  <header class="appbar">
+    <a class="brand" href="{{ url_for('account.index') }}">
+      <span class="kn-mark" aria-hidden="true">L</span>
+      <span class="apptitle">Login</span>
+    </a>
+    <div class="appbar-tools">
+      {% if pw_admin and not user %}
+        <span class="pwbadge" data-i18n="pwAdminBadge">Admin password</span>
+      {% endif %}
+      {% if user %}
+        {% if request.blueprint == 'admin' %}
+          <a class="authbtn" href="{{ url_for('account.index') }}" data-i18n="accountLink">Account</a>
+        {% elif user.admin %}
+          <a class="authbtn" href="{{ url_for('admin.index') }}" data-i18n="adminLink">Admin</a>
+        {% endif %}
+      {% endif %}
+      <select id="langSelect" class="langsel" data-i18n-aria="language" data-i18n-title="language">
+        <option value="nl">NL</option>
+        <option value="en">EN</option>
+      </select>
+      <select id="themeSelect" class="langsel" data-i18n-aria="theme" data-i18n-title="theme">
+        <option value="light" data-i18n="themeLight">☀ Light</option>
+        <option value="dark" data-i18n="themeDark">☾ Dark</option>
+      </select>
+      {% if user or pw_admin %}
+        <form method="post" action="{{ url_for('web.logout') }}" class="inline">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button type="submit" class="authbtn" data-i18n="signOut">Sign out</button>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+  <main class="page">
+    {% block main %}{% endblock %}
+  </main>
+</body>
+</html>

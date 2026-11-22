@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% set script = "account.js" %}
+{% block main %}
+{% if done %}<div class="kn-notice {{ 'kn-notice--error' if done == 'lastAdmin' else 'kn-notice--selection' }}" role="status" data-i18n="done_{{ done }}">{{ done }}</div>{% endif %}
+{% if error %}<div class="kn-notice kn-notice--error" role="alert" data-i18n="msg_{{ error }}">{{ error }}</div>{% endif %}
+{% if one_time %}
+<div class="result" role="status">
+  <span class="kn-label" data-i18n="onetime_{{ one_time.kind }}">One-time value</span>
+  <p class="muted"><b>{{ one_time.who }}</b> · <span data-i18n="onetimeNote">Shown only now. Send it over a safe channel.</span></p>
+  <div class="joinbar">
+    <input type="text" class="input mono" id="oneTime" value="{{ one_time.value }}" readonly aria-label="Value">
+    <button type="button" class="kn-btn" data-copy="oneTime" data-i18n="copy">Copy</button>
+  </div>
+</div>
+{% endif %}
+
+<section class="plate" aria-labelledby="usersH">
+  <h1 class="kn-section" id="usersH"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="usersHeading">Users</span><span class="kn-rule"></span><span class="kn-count">{{ users|length }}</span></h1>
+  <form method="post" action="{{ url_for('admin.create_user') }}" class="joinbar">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="text" name="username" class="input" required maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9._\-]{1,30}[A-Za-z0-9]" autocapitalize="none" spellcheck="false" data-i18n-ph="usernamePh" data-i18n-aria="usernameLabel">
+    <input type="text" name="name" class="input" maxlength="80" data-i18n-ph="nameLabel" aria-label="Name">
+    <button type="submit" class="kn-btn" data-i18n="createUser">Create and invite</button>
+  </form>
+  <div class="tablewrap">
+  <table class="table usertable">
+    <colgroup><col><col><col class="c-status"><col class="c-2fa"><col class="c-date"><col class="c-act"><col class="c-act"><col class="c-act"><col class="c-act"></colgroup>
+    <thead><tr><th data-i18n="usernameLabel">Username</th><th data-i18n="nameLabel">Name</th><th data-i18n="statusLabel">Status</th><th>2FA</th><th data-i18n="lastLogin">Last sign-in</th><th colspan="4" class="acthead" data-i18n="actionsLabel">Actions</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td class="uname">{{ u.username }}</td>
+        <td>{{ u.name }}</td>
+        <td>{% if u.disabled %}<span class="kn-today" data-i18n="stBlocked">Blocked</span>{% elif not u.active %}<span class="muted" data-i18n="stInvited">Invited</span>{% elif u.is_admin %}<span data-i18n="roleAdmin">Admin</span>{% else %}<span data-i18n="roleUser">User</span>{% endif %}</td>
+        <td>{% if u.has_2fa %}<span data-i18n="stateOn">On</span>{% else %}<span class="muted" data-i18n="stateOff">Off</span>{% endif %}</td>
+        <td>{% if u.last_login %}<time data-ts="{{ u.last_login }}"></time>{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td class="act"><form method="post" action="{{ url_for('admin.reset_user', uid=u.id) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="tbtn" data-confirm="confirmReset" data-i18n="{{ 'newInvite' if not u.active else 'resetUser' }}">Reset</button></form></td>
+        <td class="act">{% if u.is_admin %}<form method="post" action="{{ url_for('admin.user_action', uid=u.id, action='unadmin') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="tbtn" data-confirm="confirmUnadmin" data-i18n="unadmin">Remove admin</button></form>{% else %}<form method="post" action="{{ url_for('admin.user_action', uid=u.id, action='admin') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="tbtn" data-confirm="confirmAdmin" data-i18n="makeAdmin">Make admin</button></form>{% endif %}</td>
+        <td class="act">{% if u.disabled %}<form method="post" action="{{ url_for('admin.user_action', uid=u.id, action='unblock') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="tbtn" data-i18n="unblock">Unblock</button></form>{% else %}<form method="post" action="{{ url_for('admin.user_action', uid=u.id, action='block') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="tbtn" data-confirm="confirmBlock" data-i18n="block">Block</button></form>{% endif %}</td>
+        <td class="act"><form method="post" action="{{ url_for('admin.user_action', uid=u.id, action='delete') }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="tbtn" data-confirm="confirmDelete" data-i18n="delete">Delete</button></form></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="plate" aria-labelledby="appsH">
+  <h2 class="kn-section" id="appsH"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="appsHeading">Apps</span><span class="kn-rule"></span><span class="kn-count">{{ apps|length }}</span></h2>
+  <p class="muted"><span data-i18n="discoveryLabel">Discovery</span>: <span class="mono">{{ issuer }}/.well-known/openid-configuration</span></p>
+  {% for a in apps %}
+  <details class="appcard">
+    <summary><b>{{ a.name }}</b> <span class="mono muted">{{ a.client_id }}</span>
+      {% set ob = outbox.get(a.client_id) %}
+      {% if not a.backchannel_uri %}<span class="kn-today" data-i18n="bcMissing">No back-channel logout</span>{% endif %}
+      {% if ob and ob.failed %}<span class="kn-today" title="{{ ob.error }}"><span data-i18n="bcFailed">Logout notices failed</span>: {{ ob.failed }}</span>{% endif %}
+      {% if ob and ob.pending %}<span class="muted"><span data-i18n="bcPending">Logout notices waiting</span>: {{ ob.pending }}</span>{% endif %}
+    </summary>
+    <form method="post" action="{{ url_for('admin.save_app') }}" class="form" id="app-{{ a.client_id }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="client_id" value="{{ a.client_id }}">
+      <label class="kn-label" data-i18n="appName">Name</label><input type="text" name="name" class="input" maxlength="80" value="{{ a.name }}" required>
+      <label class="kn-label" data-i18n="redirectUris">Redirect URIs (one per line, exact)</label><textarea name="redirect_uris" class="input mono" rows="2" required>{{ a.redirect_uris|join('\n') }}</textarea>
+      <label class="kn-label" data-i18n="logoutUris">Post-logout URIs (optional)</label><textarea name="logout_uris" class="input mono" rows="2">{{ a.logout_uris|join('\n') }}</textarea>
+      <label class="kn-label" data-i18n="backchannelUri">Back-channel logout URI (optional)</label><input type="url" name="backchannel_uri" class="input mono" value="{{ a.backchannel_uri }}">
+    </form>
+    <span class="joinbar">
+      <button type="submit" form="app-{{ a.client_id }}" class="kn-btn" data-i18n="save">Save</button>
+      <form method="post" action="{{ url_for('admin.rotate_secret', client_id=a.client_id) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="kn-btn kn-btn--secondary" data-confirm="confirmSecret" data-i18n="newSecret">New secret</button></form>
+      <form method="post" action="{{ url_for('admin.delete_app', client_id=a.client_id) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button type="submit" class="kn-btn kn-btn--secondary" data-confirm="confirmDeleteApp" data-i18n="delete">Delete</button></form>
+    </span>
+  </details>
+  {% endfor %}
+  <details class="appcard" {% if not apps %}open{% endif %}>
+    <summary data-i18n="addApp">Add an app</summary>
+    <form method="post" action="{{ url_for('admin.save_app') }}" class="form">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label class="kn-label" data-i18n="clientId">Client id (a-z, 0-9, -)</label><input type="text" name="client_id" class="input mono" required pattern="[a-z0-9][a-z0-9-]{1,38}[a-z0-9]" placeholder="file-share">
+      <label class="kn-label" data-i18n="appName">Name</label><input type="text" name="name" class="input" maxlength="80" required placeholder="File Share">
+      <label class="kn-label" data-i18n="redirectUris">Redirect URIs (one per line, exact)</label><textarea name="redirect_uris" class="input mono" rows="2" required placeholder="https://share.example.nl/auth/callback"></textarea>
+      <label class="kn-label" data-i18n="logoutUris">Post-logout URIs (optional)</label><textarea name="logout_uris" class="input mono" rows="2" placeholder="https://share.example.nl/"></textarea>
+      <label class="kn-label" data-i18n="backchannelUri">Back-channel logout URI (optional)</label><input type="url" name="backchannel_uri" class="input mono" placeholder="https://share.example.nl/auth/backchannel-logout">
+      <div class="joinbar"><button type="submit" class="kn-btn" data-i18n="addApp">Add an app</button></div>
+    </form>
+  </details>
+</section>
+{% endblock %}

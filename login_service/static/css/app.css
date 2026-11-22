@@ -1,0 +1,160 @@
+/* File Share, on Knight (tokens.css + components.css). Every colour is a token. */
+html { scrollbar-gutter: stable; }
+:root { --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23566072' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+:root[data-theme="dark"] { --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2398a3b6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+body { margin: 0; background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+a { color: var(--accent-ink); }
+[hidden] { display: none !important; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--font-mono); }
+.right { text-align: right; }
+.inline { display: inline; margin: 0; }
+:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus-ring); }
+
+/* Header plate with the steel sheen (the only gradient). */
+.appbar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 12px 28px 0; padding: 10px 14px; border-radius: var(--radius-plate); border: 1px solid var(--line);
+  background: linear-gradient(var(--sheen-top), var(--sheen-bottom)); box-shadow: var(--shadow-header); }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.apptitle { font: 900 19px/1.15 var(--font-display); letter-spacing: -.01em; }
+.appbar-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* Header buttons (Admin/Beheer, Sign out/Uitloggen, Login with Google): AH Dashboard's .authbtn. */
+.authbtn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+  padding: 9px 16px; border: 1px solid var(--accent); border-radius: var(--radius-control);
+  background: var(--surface); color: var(--accent-ink); font: 700 14px/1.45 var(--font-text); letter-spacing: .01em;
+  text-decoration: none; white-space: nowrap; cursor: pointer; box-shadow: none; }
+.authbtn:hover { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.authbtn.googleauth { gap: 8px; justify-self: start; }
+.authbtn .glogo { width: 16px; height: 16px; flex: none; }
+/* Small buttons: AH Dashboard's .mini. */
+.kn-btn--secondary:hover { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.langsel { appearance: none; -webkit-appearance: none; width: auto; cursor: pointer; padding: 8px 32px 8px 12px;
+  font: 700 14px/1.2 var(--font-text); color: var(--ink); background-color: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-control); background-image: var(--chev); background-repeat: no-repeat;
+  background-position: right 10px center; background-size: 16px; }
+.langsel:hover { border-color: var(--accent); }
+.langsel:focus-visible { border-color: var(--accent); }
+.select, .input { font: 400 14px/1.2 var(--font-text); color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-control); padding: 8px 10px; }
+.select { padding: 6px 8px; font-size: 13px; font-weight: 700; }
+.input { flex: 1 1 260px; min-width: 0; }
+.input.mono { font-family: var(--font-mono); letter-spacing: .02em; }
+
+.page { flex: 1; width: 100%; max-width: 1280px; box-sizing: border-box; margin: 0 auto; padding: 24px 28px 34px; display: grid; gap: 24px; align-content: start; }
+.plate { padding: 18px; border-radius: var(--radius-plate); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-plate); display: grid; gap: 14px; }
+.plate > * { margin: 0; }
+.plate.narrow { max-width: 640px; width: 100%; justify-self: center; box-sizing: border-box; }
+.intro { max-width: 720px; }
+.intro .kn-btn { justify-self: start; text-decoration: none; }
+
+.field { display: grid; gap: 4px; }
+.field > .kn-switch { justify-self: start; }
+.pwrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.hint { font-size: 12px; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.is-error { color: var(--hot); }
+.result { display: grid; gap: 6px; padding: 14px; border-radius: var(--radius-panel); border: 1px solid var(--accent); background: var(--surface-2); }
+
+/* Links */
+
+.tablewrap { overflow-x: auto; }
+.tablewrap .table td:first-child { white-space: nowrap; }
+
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 0; font-size: 14px; }
+.facts dt { font: 700 11px/1.9 var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Admin */
+.table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.table th { font: 700 11px/1.3 var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.table td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.ownerhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.ownername { margin: 0; font: 700 14.5px/1.35 var(--font-text); overflow-wrap: anywhere; }
+
+
+@media (max-width: 700px) {
+  .appbar { position: static; margin: 10px 16px 0; }
+  .page { padding: 16px; }
+    .apptitle { font-size: 17px; }
+  .facts { grid-template-columns: 1fr; gap: 0 0; }
+  .facts dd { margin-bottom: 6px; }
+  .langsel { padding: 6px 22px 6px 8px; font-size: 13px; background-position: right 5px center; }
+  .table thead { display: none; }
+  .table tr { display: grid; grid-template-columns: 1fr 1fr; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .table td { border: 0; padding: 3px 8px; }
+  .kn-switch { flex-wrap: wrap; }
+}
+
+/* ---- One button size, two weights (like AH Dashboard's Refresh / Force refresh) ----------------
+   Primary: solid azure, for the main action of a view. Secondary: white with an azure border and
+   azure text, for everything else (also Remove / Expire / Delete). Same height as inputs and menus. */
+.kn-btn, .authbtn { box-sizing: border-box; min-height: 38px; padding: 9px 16px; font: 700 14px/1.2 var(--font-text);
+  letter-spacing: .01em; border: 1px solid var(--accent); border-radius: var(--radius-control); white-space: nowrap;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; cursor: pointer; }
+.kn-btn { background: var(--accent); color: var(--on-accent); }
+.kn-btn--secondary, .authbtn { background: var(--surface); color: var(--accent-ink); box-shadow: none; }
+.kn-btn--secondary:hover, .authbtn:hover { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); color: var(--accent-ink); }
+.kn-btn--icon { min-height: 0; width: 26px; height: 26px; padding: 0; border-color: var(--line); background: var(--surface-2); color: var(--muted); }
+.input, .langsel { box-sizing: border-box; min-height: 38px; }
+.input { padding: 9px 12px; }
+
+/* A bar: an input and its buttons (or related buttons) joined into one control. */
+.joinbar { display: flex; align-items: stretch; min-width: 0; }
+.joinbar > * { border-radius: 0; margin: 0; }
+.joinbar > * + * { margin-left: -1px; }
+.joinbar > :first-child { border-top-left-radius: var(--radius-control); border-bottom-left-radius: var(--radius-control); }
+.joinbar > :last-child { border-top-right-radius: var(--radius-control); border-bottom-right-radius: var(--radius-control); }
+.joinbar > .input { flex: 1 1 auto; min-width: 0; }
+.joinbar > .input:focus-visible, .joinbar > .kn-btn:focus-visible, .joinbar > .authbtn:focus-visible { position: relative; z-index: 1; }
+.joinbar > form { display: flex; }
+.joinbar > form > button { border-radius: inherit; }
+.joinbar > form + form { margin-left: -1px; }
+span.joinbar { display: inline-flex; }
+@media (max-width: 700px) {
+  .joinbar .kn-btn, .joinbar .authbtn { padding: 9px 12px; }
+}
+
+/* ---- Login Service ---------------------------------------------------------------------- */
+.form { display: grid; gap: 8px; }
+.form .kn-btn, .form .joinbar { justify-self: start; }
+.form .kn-label { margin: 6px 0 0; }
+.input.code { flex: 0 1 160px; font: 700 20px/1.2 var(--font-mono); letter-spacing: .25em; text-align: center; }
+textarea.input { resize: vertical; min-height: 60px; }
+.setup2fa { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.setup2fa .qr { background: var(--media-well); border-radius: var(--radius-control); padding: 8px; border: 1px solid var(--line); }
+.setupsteps { flex: 1 1 260px; display: grid; gap: 8px; }
+.setupsteps ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.kn-count.on { background: var(--accent); color: var(--on-accent); }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 0; font-size: 14px; }
+.facts dt { font: 700 11px/1.9 var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+.appcard { border: 1px solid var(--line); border-radius: var(--radius-panel); padding: 10px 14px; background: var(--surface); }
+.appcard summary { cursor: pointer; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.appcard[open] { display: grid; gap: 12px; }
+.tablewrap { overflow-x: auto; }
+.tablewrap .table td:first-child { white-space: nowrap; }
+@media (max-width: 700px) {
+  .facts { grid-template-columns: 1fr; gap: 0; }
+  .facts dd { margin-bottom: 6px; }
+  form.joinbar { flex-wrap: wrap; }
+}
+.pwbadge { font: 700 11px/1.3 var(--font-display); letter-spacing: .1em; text-transform: uppercase; color: var(--today-ink); background: var(--today-bg); padding: 6px 10px; border-radius: var(--radius-chip); }
+
+/* Users table: every action has its own column and the button fills its cell, so the actions
+   read as part of the table and keep one width whatever the label (Block / Unblock). */
+.usertable { table-layout: fixed; min-width: 1060px; }
+.usertable .c-status { width: 120px; } .usertable .c-2fa { width: 56px; } .usertable .c-date { width: 130px; }
+.usertable .c-act { width: 150px; }
+.usertable th.acthead { text-align: center; }
+.usertable td { overflow: hidden; text-overflow: ellipsis; }
+.usertable td.uname { font-weight: 700; white-space: nowrap; }
+.usertable td.act { padding: 0; border-left: 1px solid var(--line); }
+.usertable td.act form { display: block; height: 100%; margin: 0; }
+.tbtn { display: block; width: 100%; min-height: 44px; padding: 8px 6px; border: 0; border-radius: 0; background: transparent;
+  color: var(--accent-ink); font: 700 13px/1.2 var(--font-text); cursor: pointer; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; box-shadow: none; }
+.tbtn:hover { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.tbtn:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--focus-ring); }
+.usertable tbody tr:hover td { background: color-mix(in srgb, var(--accent) 3%, var(--surface)); }
+.appcard > .joinbar { justify-self: start; margin-top: 6px; }

@@ -1,0 +1,30 @@
+# Login Service as a vps-platform app (checked against vps-platform's own validation and
+# render; the rendered compose file runs this image healthy, read-only, as user app).
+#
+# Copy to vps-platform/ansible/inventory/<env>/apps/login-service.yml (or answer
+# `./vpsctl app add login-service` with these values) and set the secrets:
+#   ./vpsctl vault-edit login-service
+#     SECRET_KEY: <docker run --rm ghcr.io/<owner>/login-service python -m login_service.admin secret-key>
+#     ADMIN_PASSWORD_HASH: <docker run --rm -it ghcr.io/<owner>/login-service python -m login_service.admin password>
+#   (one line each, no single quotes; never put them under env: below)
+# Then: ./vpsctl app apply login-service ; ./vpsctl github login-service  (CI variables/secrets)
+domain: login.example.nl
+aliases: []
+image_repo: ghcr.io/<owner>/login-service   # make the GHCR package PUBLIC: the server pulls without a login
+port: 8080
+image_healthcheck: true
+health_path: /healthz
+read_only: true
+volumes:
+  data: /app/data                  # database + token-signing keys (backed up before each release; keep it)
+memory: 256m                       # at most 2 password checks (scrypt, ~32 MB each) run at once
+cpus: 0.5
+env:
+  APP_ENV: production
+  ISSUER: https://login.example.nl # = https://<domain>; the apps are configured with exactly this
+  COOKIE_SECURE: "true"
+  REQUIRE_ADMIN_2FA: "true"
+  # Safe: only Caddy shares this app's network, and Caddy replaces X-Forwarded-For.
+  TRUSTED_PROXY: "*"
+  TRUSTED_PROXY_COUNT: "1"
+deploy_ssh_key: ""                 # filled in by vpsctl

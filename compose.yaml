@@ -1,0 +1,28 @@
+# Local run: docker compose up -d --build   -> http://127.0.0.1:8081
+# Settings from .env (see .env.example). For plain http locally set
+# APP_ENV=development and COOKIE_SECURE=false there.
+services:
+  login-service:
+    build: .
+    image: login-service:latest
+    container_name: login-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "8080"
+    ports:
+      - "127.0.0.1:8081:8080"
+    volumes:
+      - ls-data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  ls-data:

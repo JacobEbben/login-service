@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="plate narrow" aria-labelledby="t">
+  <h1 class="kn-section" id="t"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="adminLoginTitle">Admin password</span><span class="kn-rule"></span></h1>
+  <p class="muted" data-i18n="adminLoginText">For creating the first accounts, and as the emergency way in. Admins with an account sign in normally.</p>
+  {% if error %}<div class="kn-notice kn-notice--error" role="alert" data-i18n="msg_{{ error }}">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('admin.login_post') }}" class="form" autocomplete="off">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="kn-label" for="adminPassword" data-i18n="passwordLabel">Password</label>
+    <div class="joinbar">
+      <input type="password" id="adminPassword" name="password" class="input" required maxlength="1024" autocomplete="current-password" autofocus>
+      <button type="submit" class="kn-btn" data-i18n="signIn">Sign in</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

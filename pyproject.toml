@@ -1,0 +1,46 @@
+# Tool settings only: the app is not installed as a package (the image copies
+# login_service/ and runs serve.py). Dependencies: requirements*.txt / .lock.
+
+[project]
+name = "login-service"
+version = "1.0.0"
+license = "MIT"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["node_modules"]
+
+[tool.ruff.lint]
+# pyflakes + pycodestyle errors, import order, bugbear, pyupgrade, simplify
+select = ["F", "E", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = [
+  "E501",    # long lines: the formatter's job, some URLs/messages are long on purpose
+  "RUF001",  # ambiguous unicode in strings (en dashes in user messages are intended)
+  "RUF002",
+  "RUF003",
+  "SIM105",  # contextlib.suppress: try/except/pass reads fine
+  "SIM108",  # ternaries are not always clearer
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests: fake servers keep class-level state, small lambdas and inline
+# imports are fine there.
+"tests/**" = ["RUF012", "E731", "E402", "E741", "RUF015", "RUF059", "SIM115", "UP031", "B023"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["login_service"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["login_service"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+check_untyped_defs = true
+no_implicit_optional = true
+ignore_missing_imports = true

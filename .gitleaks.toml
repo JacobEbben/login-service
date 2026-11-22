@@ -1,0 +1,4 @@
+# Secret scanning (CI): gitleaks' default rules, no exceptions. Fake values in
+# tests are deliberately obvious so they need no allowlist.
+[extend]
+useDefault = true

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="plate narrow" aria-labelledby="t">
+  <h1 class="kn-section" id="t"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="inviteTitle">Choose a password</span><span class="kn-rule"></span></h1>
+  <p><span data-i18n="inviteFor">For</span> <b>{{ username }}</b></p>
+  {% if error %}<div class="kn-notice kn-notice--error" role="alert" data-i18n="msg_{{ error }}">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('web.invite_post', token=token) }}" class="form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="text" name="username" value="{{ username }}" autocomplete="username" hidden>
+    <label class="kn-label" for="pw1" data-i18n="newPassword">New password</label>
+    <input type="password" id="pw1" name="password" class="input" required minlength="12" maxlength="1024" autocomplete="new-password" autofocus>
+    <span class="hint" data-i18n="pwRule">At least 12 characters.</span>
+    <label class="kn-label" for="pw2" data-i18n="repeatPassword">Repeat password</label>
+    <input type="password" id="pw2" name="password2" class="input" required minlength="12" maxlength="1024" autocomplete="new-password">
+    <button type="submit" class="kn-btn" data-i18n="save">Save</button>
+  </form>
+</section>
+{% endblock %}

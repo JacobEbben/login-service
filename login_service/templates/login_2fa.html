@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="plate narrow" aria-labelledby="t">
+  <h1 class="kn-section" id="t"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="twofaTitle">Code from your authenticator app</span><span class="kn-rule"></span></h1>
+  {% if error %}<div class="kn-notice kn-notice--error" role="alert" data-i18n="msg_{{ error }}">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('web.second_factor_post') }}" class="form" autocomplete="off">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="kn-label" for="code" data-i18n="codeLabel">6-digit code</label>
+    <div class="joinbar">
+      <input type="text" id="code" name="code" class="input code" required inputmode="numeric" pattern="[0-9 ]{6,7}" maxlength="7" autocomplete="one-time-code" autofocus>
+      <button type="submit" class="kn-btn" data-i18n="confirm">Confirm</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

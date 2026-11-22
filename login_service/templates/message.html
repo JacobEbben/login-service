@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="plate narrow">
+  <p data-i18n="msg_{{ key }}">{{ key }}</p>
+  <p><a class="kn-btn kn-btn--secondary" href="{{ url_for('account.index') }}" data-i18n="home">Home</a></p>
+</section>
+{% endblock %}

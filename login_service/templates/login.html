@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="plate narrow" aria-labelledby="t">
+  <h1 class="kn-section" id="t"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="signInTitle">Sign in</span><span class="kn-rule"></span></h1>
+  {% if error %}<div class="kn-notice {{ 'kn-notice--selection' if error in ('signedOut', 'signedOutEverywhere', 'passwordSet') else 'kn-notice--error' }}" role="status" data-i18n="msg_{{ error }}">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('web.login_post') }}" class="form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label class="kn-label" for="username" data-i18n="usernameLabel">Username</label>
+    <input type="text" id="username" name="username" class="input" required maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" value="{{ username or '' }}" {% if not username %}autofocus{% endif %}>
+    <label class="kn-label" for="password" data-i18n="passwordLabel">Password</label>
+    <input type="password" id="password" name="password" class="input" required maxlength="1024" autocomplete="current-password" {% if username %}autofocus{% endif %}>
+    <button type="submit" class="kn-btn" data-i18n="signIn">Sign in</button>
+  </form>
+</section>
+{% endblock %}

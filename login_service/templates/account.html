@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% set script = "account.js" %}
+{% block main %}
+{% if done %}<div class="kn-notice kn-notice--selection" role="status" data-i18n="done_{{ done }}">{{ done }}</div>{% endif %}
+{% if error %}<div class="kn-notice kn-notice--error" role="alert" data-i18n="msg_{{ error }}">{{ error }}</div>{% endif %}
+
+<section class="plate" aria-labelledby="accTitle">
+  <h1 class="kn-section" id="accTitle"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="accountTitle">Your account</span><span class="kn-rule"></span></h1>
+  <dl class="facts">
+    <dt data-i18n="usernameLabel">Username</dt><dd>{{ me.username }}</dd>
+    <dt data-i18n="roleLabel">Role</dt><dd>{% if me.admin %}<span data-i18n="roleAdmin">Admin</span>{% else %}<span data-i18n="roleUser">User</span>{% endif %}</dd>
+    <dt data-i18n="sessionsLabel">Active sign-ins</dt><dd>{{ sessions }}</dd>
+  </dl>
+  <form method="post" action="{{ url_for('account.name') }}" class="form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="kn-label" for="name" data-i18n="nameLabel">Name</label>
+    <div class="joinbar">
+      <input type="text" id="name" name="name" class="input" maxlength="80" value="{{ me.name }}" autocomplete="name">
+      <button type="submit" class="kn-btn kn-btn--secondary" data-i18n="save">Save</button>
+    </div>
+  </form>
+</section>
+
+<section class="plate" aria-labelledby="twofaH" id="twofa">
+  <h2 class="kn-section" id="twofaH"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="twofaHeading">Two-factor authentication</span><span class="kn-rule"></span>
+    <span class="kn-count {{ 'on' if me.has_2fa else '' }}" data-i18n="{{ 'stateOn' if me.has_2fa else 'stateOff' }}">{{ 'On' if me.has_2fa else 'Off' }}</span></h2>
+  {% if me.has_2fa %}
+    <p data-i18n="twofaOnText">Signing in asks for a code from your authenticator app.</p>
+    {% if required_2fa %}
+      <p class="muted" data-i18n="twofaRequiredText">Required for admins: it can't be turned off.</p>
+    {% else %}
+    <form method="post" action="{{ url_for('account.disable_2fa') }}" class="form" autocomplete="off">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label class="kn-label" for="cur1" data-i18n="currentPassword">Current password</label>
+      <input type="password" id="cur1" name="current" class="input" required maxlength="1024" autocomplete="current-password">
+      <label class="kn-label" for="code1" data-i18n="codeLabel">6-digit code</label>
+      <div class="joinbar">
+        <input type="text" id="code1" name="code" class="input code" required inputmode="numeric" maxlength="7" autocomplete="one-time-code">
+        <button type="submit" class="kn-btn kn-btn--secondary" data-confirm="confirmTwofaOff" data-i18n="turnOff">Turn off</button>
+      </div>
+    </form>
+    {% endif %}
+  {% elif setup %}
+    {% include "_setup_2fa_body.html" %}
+    <form method="post" action="{{ url_for('account.enable_2fa') }}" class="form" autocomplete="off">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label class="kn-label" for="cur3" data-i18n="currentPassword">Current password</label>
+      <input type="password" id="cur3" name="current" class="input" required maxlength="1024" autocomplete="current-password">
+      <label class="kn-label" for="code2" data-i18n="codeLabel">6-digit code</label>
+      <div class="joinbar">
+        <input type="text" id="code2" name="code" class="input code" required inputmode="numeric" maxlength="7" autocomplete="one-time-code">
+        <button type="submit" class="kn-btn" data-i18n="turnOn">Turn on</button>
+      </div>
+    </form>
+    <form method="post" action="{{ url_for('account.cancel_2fa') }}" class="inline">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button type="submit" class="kn-btn kn-btn--secondary" data-i18n="cancel">Cancel</button>
+    </form>
+  {% else %}
+    <p data-i18n="twofaOffText">Protect your account with a code from an authenticator app (such as Google Authenticator, Microsoft Authenticator or 1Password) on top of your password.</p>
+    <form method="post" action="{{ url_for('account.start_2fa') }}" class="inline">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button type="submit" class="kn-btn" data-i18n="setupStart">Set up</button>
+    </form>
+  {% endif %}
+</section>
+
+<section class="plate" aria-labelledby="pwH">
+  <h2 class="kn-section" id="pwH"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="passwordHeading">Password</span><span class="kn-rule"></span></h2>
+  <form method="post" action="{{ url_for('account.password') }}" class="form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="text" name="username" value="{{ me.username }}" autocomplete="username" hidden>
+    <label class="kn-label" for="cur2" data-i18n="currentPassword">Current password</label>
+    <input type="password" id="cur2" name="current" class="input" required maxlength="1024" autocomplete="current-password">
+    <label class="kn-label" for="new1" data-i18n="newPassword">New password</label>
+    <input type="password" id="new1" name="new" class="input" required minlength="12" maxlength="1024" autocomplete="new-password">
+    <span class="hint" data-i18n="pwRule">At least 12 characters.</span>
+    <label class="kn-label" for="new2" data-i18n="repeatPassword">Repeat password</label>
+    <input type="password" id="new2" name="new2" class="input" required minlength="12" maxlength="1024" autocomplete="new-password">
+    <button type="submit" class="kn-btn kn-btn--secondary" data-i18n="changePassword">Change password</button>
+  </form>
+</section>
+
+<section class="plate" aria-labelledby="sessH">
+  <h2 class="kn-section" id="sessH"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="sessionsHeading">Sign-ins</span><span class="kn-rule"></span><span class="kn-count">{{ sessions }}</span></h2>
+  <form method="post" action="{{ url_for('account.sign_out_everywhere') }}" class="inline">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button type="submit" class="kn-btn kn-btn--secondary" data-confirm="confirmEverywhere" data-i18n="signOutEverywhere">Sign out everywhere</button>
+  </form>
+</section>
+{% endblock %}

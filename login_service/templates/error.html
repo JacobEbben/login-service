@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="plate narrow">
+  {% if status == 404 %}<p data-i18n="page404">This page doesn't exist.</p>
+  {% elif status == 429 %}<p data-i18n="msg_tooMany">Too many attempts. Try again later.</p>
+  {% else %}<p><span data-i18n="pageError">Something went wrong. Please try again later.</span>{% if ref %} <span class="mono">(ref {{ ref }})</span>{% endif %}</p>{% endif %}
+  <p><a class="kn-btn kn-btn--secondary" href="{{ url_for('account.index') }}" data-i18n="home">Home</a></p>
+</section>
+{% endblock %}

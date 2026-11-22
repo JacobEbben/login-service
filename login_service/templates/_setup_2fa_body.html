@@ -1,0 +1,15 @@
+<div class="setup2fa">
+  <img class="qr" src="{{ qr }}" alt="" width="200" height="200">
+  <div class="setupsteps">
+    <ol>
+      <li data-i18n="setupStep1">Open your authenticator app and add an account.</li>
+      <li data-i18n="setupStep2">Scan this QR code, or type the key below.</li>
+      <li data-i18n="setupStep3">Enter the 6-digit code the app shows.</li>
+    </ol>
+    <span class="kn-label" data-i18n="setupKey">Key</span>
+    <div class="joinbar">
+      <input type="text" class="input mono" id="setupKey" value="{{ secret_text }}" readonly aria-label="Key">
+      <button type="button" class="kn-btn kn-btn--secondary" data-copy="setupKey" data-i18n="copy">Copy</button>
+    </div>
+  </div>
+</div>

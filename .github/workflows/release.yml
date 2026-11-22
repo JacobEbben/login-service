@@ -1,0 +1,126 @@
+# main: checks -> build the image once -> smoke test + scan -> push to GHCR
+# -> deploy to the VPS over the restricted deploy key (environment "production").
+# The server's app-deploy (vps-platform) backs up the data volume, switches the image
+# (old one stopped first: one process) and rolls back by itself when unhealthy.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never two releases at once; never cancel a deploy halfway.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Build, test and push the image
+    needs: checks
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.push.outputs.image }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Build
+        run: >
+          docker build -t login-service:ci
+          --label org.opencontainers.image.revision=${{ github.sha }}
+          --label org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }} .
+
+      - name: Smoke test (production-like, no ISSUER secret, no users)
+        run: bash deploy/smoke-image.sh login-service:ci
+
+      # Trivy gets a saved copy of the image, read-only, and never the Docker socket: with the
+      # socket a tampered scanner could swap the image that the next step pushes and deploys.
+      # It is pinned by digest (0.76.1), so a moved tag can't change what runs here.
+      - name: Vulnerability scan (fixable critical issues fail the release)
+        run: |
+          docker save login-service:ci -o "$RUNNER_TEMP/image.tar"
+          docker run --rm -v "$RUNNER_TEMP/image.tar:/image.tar:ro" \
+            aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c \
+            image --quiet --exit-code 1 --severity CRITICAL --ignore-unfixed --input /image.tar
+          rm -f "$RUNNER_TEMP/image.tar"
+
+      - name: Push to GitHub Container Registry
+        id: push
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repo="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/login-service"
+          echo "$TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker tag login-service:ci "$repo:sha-$GITHUB_SHA"
+          docker tag login-service:ci "$repo:main"
+          docker push -q "$repo:sha-$GITHUB_SHA"
+          docker push -q "$repo:main"
+          image="$(docker inspect --format '{{index .RepoDigests 0}}' "$repo:sha-$GITHUB_SHA")"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "Pushed $image" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Deploy to the VPS
+    needs: build
+    # Switched on by the REPOSITORY variable DEPLOY_ENABLED=true. A job's `if:` is
+    # evaluated before the job enters its environment, so it can't see the
+    # environment's variables (DEPLOY_HOST etc., from `vpsctl github login-service`).
+    # Only main: also a manual run (workflow_dispatch) from another branch never deploys.
+    if: vars.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: https://${{ vars.DOMAIN }}
+    permissions: {}                   # needs no GitHub token rights
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Check the image repository
+        env:
+          IMAGE: ${{ needs.build.outputs.image }}
+          IMAGE_REPO: ${{ vars.IMAGE_REPO }}
+        run: |
+          [[ "$IMAGE" =~ ^"$IMAGE_REPO"@sha256:[0-9a-f]{64}$ ]] || {
+            echo "::error::Built $IMAGE, but the server only accepts $IMAGE_REPO@sha256:<digest> (vars.IMAGE_REPO / image_repo in vps-platform)."
+            exit 1; }
+
+      # vps-platform's app-deploy (as deploy-login-service; the key can only run
+      # deploy/status/rollback of this app): backup, stop old, start new,
+      # health check, automatic rollback. Values only via env, never ${{ }} in the script.
+      - name: Deploy (backup, switch, health check, rollback on failure)
+        env:
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
+          IMAGE: ${{ needs.build.outputs.image }}
+          TARGET: ${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}
+          PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: |
+          umask 077
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/key"
+          printf '%s\n' "$KNOWN_HOSTS" > "$RUNNER_TEMP/known_hosts"
+          ssh -i "$RUNNER_TEMP/key" -p "$PORT" -o BatchMode=yes -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" \
+              "$TARGET" "deploy $IMAGE"
+
+      - name: Public health check through Caddy
+        env:
+          DOMAIN: ${{ vars.DOMAIN }}
+        run: curl -fsS --retry 10 --retry-delay 3 --retry-all-errors -o /dev/null "https://$DOMAIN/healthz"
+
+      - name: Summary
+        env:
+          IMAGE: ${{ needs.build.outputs.image }}
+          DOMAIN: ${{ vars.DOMAIN }}
+        run: echo "Deployed \`$IMAGE\` to https://$DOMAIN" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="plate narrow" aria-labelledby="t">
+  <h1 class="kn-section" id="t"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="logoutTitle">Sign out?</span><span class="kn-rule"></span></h1>
+  <p data-i18n="logoutText">You are signed out here and in every app you signed in to with this login.</p>
+  <form method="post" action="{{ url_for('oidc.logout_confirm') }}" class="form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {% for k in ('id_token_hint', 'post_logout_redirect_uri', 'state', 'client_id') %}{% if args.get(k) %}<input type="hidden" name="{{ k }}" value="{{ args.get(k) }}">{% endif %}{% endfor %}
+    <button type="submit" class="kn-btn" data-i18n="signOut">Sign out</button>
+  </form>
+</section>
+{% endblock %}

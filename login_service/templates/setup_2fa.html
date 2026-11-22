@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set script = "account.js" %}
+{% block main %}
+<section class="plate narrow" aria-labelledby="t">
+  <h1 class="kn-section" id="t"><svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 1l5 5-5 5M8 1l5 5-5 5" fill="none" stroke-width="2"/></svg><span data-i18n="setupTitle">Set up two-factor authentication</span><span class="kn-rule"></span></h1>
+  <p data-i18n="setupForced">Admins must use an authenticator app. Set it up to continue.</p>
+  {% if error %}<div class="kn-notice kn-notice--error" role="alert" data-i18n="msg_{{ error }}">{{ error }}</div>{% endif %}
+  {% include "_setup_2fa_body.html" %}
+  <form method="post" action="{{ url_for('web.setup_second_factor_post') }}" class="form" autocomplete="off">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="kn-label" for="code" data-i18n="codeLabel">6-digit code</label>
+    <div class="joinbar">
+      <input type="text" id="code" name="code" class="input code" required inputmode="numeric" maxlength="7" autocomplete="one-time-code">
+      <button type="submit" class="kn-btn" data-i18n="turnOn">Turn on</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

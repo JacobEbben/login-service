@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+data/
+node_modules/
+.env
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+secret.key
+*.pem
+*.key
+*.tar.gz
+.claude/settings.local.json
