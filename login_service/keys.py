@@ -119,7 +119,7 @@ class KeyRing:
 
 class SecretBox:
     """Encrypts 2FA secrets in the database (Fernet: AES-128-CBC + HMAC-SHA256),
-    with a key derived from SECRET_KEY. Set SECRET_KEY in the vault so a copy of
+    with a key derived from SECRET_KEY. Set SECRET_KEY in the secret store so a copy of
     the database alone doesn't reveal anyone's authenticator secret."""
 
     def __init__(self, secret_key: str):

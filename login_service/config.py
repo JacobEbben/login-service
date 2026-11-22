@@ -92,6 +92,6 @@ def validate(s: Settings) -> None:
         raise ValueError("production needs COOKIE_SECURE=true and an https ISSUER")
     if s.app_env == "production" and len(s.secret_key) < 32:
         # It also encrypts the 2FA secrets: generated into the data volume it would sit next to the
-        # database in every backup. In production it must come from the vault.
-        raise ValueError("production needs SECRET_KEY (>= 32 characters, from the vault): "
+        # database in every backup. In production it must come from the secret store.
+        raise ValueError("production needs SECRET_KEY (>= 32 characters, from the secret store): "
                          "python -m login_service.admin secret-key")

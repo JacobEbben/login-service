@@ -56,7 +56,7 @@ docker build -t login-service:ci . && bash deploy/smoke-image.sh login-service:c
   replaces it. Hash refused unless scrypt/pbkdf2; the CLI demands ≥ 16 characters.
 - **Admins**: with REQUIRE_ADMIN_2FA the admin panel requires a session with `amr` containing `otp`; admins
   can't turn 2FA off; the last active admin can't be demoted/blocked/deleted.
-- **SECRET_KEY** is required in production (`config.validate`, ≥ 32 chars, from the vault; never generated
+- **SECRET_KEY** is required in production (`config.validate`, ≥ 32 chars, from the secret store; never generated
   into the volume there) and never changes after go-live (it decrypts the 2FA secrets). Signing keys live in the data
   volume (`keys/`), mode 0600; rotation = rename + restart.
 - **CSP form-action** = 'self' + registered apps' origins (browsers apply it to the redirect after the login

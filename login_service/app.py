@@ -54,7 +54,7 @@ def services(app: Flask | None = None) -> Services:
 
 def _secret_key(settings: Settings) -> str:
     """SECRET_KEY, or one generated once into the data volume (never in the image).
-    In production set it in the vault: it also encrypts the 2FA secrets."""
+    In production set it in the secret store: it also encrypts the 2FA secrets."""
     if settings.secret_key:
         return settings.secret_key
     if settings.testing:

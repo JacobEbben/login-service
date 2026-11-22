@@ -1,6 +1,6 @@
 """Command line for the server operator (run inside the container, with the same settings):
 
-    python -m login_service.admin secret-key                    # a SECRET_KEY for the vault
+    python -m login_service.admin secret-key                    # a SECRET_KEY for the secret store
     python -m login_service.admin password                      # ADMIN_PASSWORD_HASH for /admin/login
     python -m login_service.admin create-admin yourname "Your Name"
     python -m login_service.admin reset yourname
@@ -34,7 +34,7 @@ def make_hash() -> int:
         print("Passwords do not match.", file=sys.stderr)
         return 1
     # Single quotes: the hash contains "$", which Docker Compose would otherwise expand.
-    print("\nAdd this line to .env (or the vault) and restart; /admin/login then accepts it:\n")
+    print("\nAdd this line to .env (or the secret store) and restart; /admin/login then accepts it:\n")
     print("ADMIN_PASSWORD_HASH='" + generate_password_hash(password) + "'")
     return 0
 
@@ -47,7 +47,7 @@ def main(argv: list[str]) -> int:
         return make_hash()
     if argv[:1] == ["secret-key"]:
         import secrets
-        print("SECRET_KEY: " + secrets.token_urlsafe(48) + "    # put this in the vault; never change it afterwards")
+        print("SECRET_KEY: " + secrets.token_urlsafe(48) + "    # put this in the secret store; never change it afterwards")
         return 0
     if len(argv) < 2 or argv[0] not in ("create-admin", "reset"):
         print(USAGE, file=sys.stderr)

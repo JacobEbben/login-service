@@ -1,6 +1,6 @@
 # main: checks -> build the image once -> smoke test + scan -> push to GHCR
 # -> deploy to the VPS over the restricted deploy key (environment "production").
-# The server's app-deploy (vps-platform) backs up the data volume, switches the image
+# The server's `deploy` command (see README) backs up the data volume, switches the image
 # (old one stopped first: one process) and rolls back by itself when unhealthy.
 name: Release
 
@@ -75,7 +75,7 @@ jobs:
     needs: build
     # Switched on by the REPOSITORY variable DEPLOY_ENABLED=true. A job's `if:` is
     # evaluated before the job enters its environment, so it can't see the
-    # environment's variables (DEPLOY_HOST etc., from `vpsctl github login-service`).
+    # environment's variables (DEPLOY_HOST etc.).
     # Only main: also a manual run (workflow_dispatch) from another branch never deploys.
     if: vars.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
@@ -93,10 +93,10 @@ jobs:
           IMAGE_REPO: ${{ vars.IMAGE_REPO }}
         run: |
           [[ "$IMAGE" =~ ^"$IMAGE_REPO"@sha256:[0-9a-f]{64}$ ]] || {
-            echo "::error::Built $IMAGE, but the server only accepts $IMAGE_REPO@sha256:<digest> (vars.IMAGE_REPO / image_repo in vps-platform)."
+            echo "::error::Built $IMAGE, but the server only accepts $IMAGE_REPO@sha256:<digest> (vars.IMAGE_REPO)."
             exit 1; }
 
-      # vps-platform's app-deploy (as deploy-login-service; the key can only run
+      # The server's deploy command (the key can only run
       # deploy/status/rollback of this app): backup, stop old, start new,
       # health check, automatic rollback. Values only via env, never ${{ }} in the script.
       - name: Deploy (backup, switch, health check, rollback on failure)

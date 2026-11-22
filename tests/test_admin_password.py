@@ -91,7 +91,7 @@ def test_hash_must_not_be_a_plain_password(tmp_path):
         validate(replace(make_settings(tmp_path), app_env="production", admin_password_hash="hunter2hunter2hunter2"))
 
 
-def test_production_requires_a_secret_key_from_the_vault(tmp_path):
+def test_production_requires_a_secret_key(tmp_path):
     from conftest import make_settings
 
     from login_service.config import validate

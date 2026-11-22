@@ -1,7 +1,7 @@
 """Run the app with Waitress (the container's entry point: ``python serve.py``).
 
-Behind vps-platform's Caddy set TRUSTED_PROXY=* (only Caddy shares the app's
-network, and Caddy replaces X-Forwarded-For), so rate limits apply per visitor.
+Behind a reverse proxy set TRUSTED_PROXY=* (only when the proxy alone can reach the
+app, and it replaces X-Forwarded-For), so rate limits apply per visitor.
 """
 
 import os
